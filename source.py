@@ -1,3 +1,4 @@
+import sqlite3
 try:
     from tkinter import *
     import tkinter.ttk as ttk
@@ -5,6 +6,14 @@ try:
 except ImportError:
     from Tkinter import *
     import tkMessageBox
+
+# Database connection information
+# Change this to the database's path
+DATABASE_PATH = 'Placeholder'
+# DB Creation
+connect = sqlite3.connect(DATABASE_PATH)
+# Cursor object creation for interaction with DB
+cursor = connect.cursor()
 
 # configure root
 root = Tk()
@@ -31,6 +40,14 @@ menu_frame = Frame(content_frame, bg="lightblue", width=80, height=350)
 page_frame = Frame(content_frame, bg="snow2", width=420, height=350)
 menu_frame.grid(row=0, column=0, sticky="ns")
 page_frame.grid(row=0, column=1, sticky="nesw")
+
+
+def DBConnect():
+    cursor.execute('''CREATE TABLE IF NOT EXISTS `BrainVireLeaveManagement` (emp_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT, password TEXT, HolidayHours INT)''')
+
+
+def DBUpdate(emp_id, Hours):
+    cursor.execute('''UPDATE BrainVireLeaveManagement SET HolidayHours = ? WHERE emp_id = ?''', (emp_id, Hours))
 
 
 def leave_page():
@@ -73,12 +90,15 @@ def login():
     def auth():
         usr = username_login_entry.get()
         psd = password__login_entry.get()
-        if usr == "admin" and psd == "admin":
-            policy()
-        elif usr != "admin" and psd != "admin":
-            tkMessageBox.showinfo("Error", "Invalid Credentials")
-        else:
-            tkMessageBox.showinfo("Error", "Invalid Credentials")
+        try:
+            cursor.execute('''SELECT password FROM BrainVireLeaveManagement WHERE username = ?''', usr)
+            authPsd = cursor.fetchone()
+            if psd == authPsd[0]:
+                policy()
+            else:
+                tkMessageBox.showinfo("Error", "Invalid Credentials")
+        except Exception as e:
+            tkMessageBox.showinfo("Error", e)
 
     # page_frame widgets
     Button(page_frame, text="Exit", relief=GROOVE, bd=2, bg="lightblue", command=exitProgram, borderwidth=1).pack(
