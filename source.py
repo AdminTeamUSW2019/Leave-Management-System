@@ -15,6 +15,7 @@ connect = sqlite3.connect(DATABASE_PATH)
 # Cursor object creation for interaction with DB
 cursor = connect.cursor()
 
+
 # configure root
 root = Tk()
 root.geometry("500x400")
@@ -44,10 +45,12 @@ page_frame.grid(row=0, column=1, sticky="nesw")
 
 def DBConnect():
     cursor.execute('''CREATE TABLE IF NOT EXISTS `BrainVireLeaveManagement` (emp_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT, password TEXT, HolidayHours INT)''')
+    # Insert admin account - TEMPORARY SETUP DO NOT USE THIS ON FINAL
+    cursor.execute('''INSERT INTO BrainVireLeaveManagement(username, password, HolidayHours) VALUES('admin', 'admin', 0)''')
 
 
 def DBUpdate(emp_id, Hours):
-    cursor.execute('''UPDATE BrainVireLeaveManagement SET HolidayHours = ? WHERE emp_id = ?''', (emp_id, Hours))
+    cursor.execute('''UPDATE BrainVireLeaveManagement SET HolidayHours = ? WHERE emp_id = 1''', Hours)
 
 
 def leave_page():
@@ -87,11 +90,13 @@ def exitProgram():
 
 
 def login():
+    DBConnect()
+
     def auth():
         usr = username_login_entry.get()
         psd = password__login_entry.get()
         try:
-            cursor.execute('''SELECT password FROM BrainVireLeaveManagement WHERE username = ?''', usr)
+            cursor.execute('''SELECT password FROM BrainVireLeaveManagement WHERE username = ?''', [usr])
             authPsd = cursor.fetchone()
             if psd == authPsd[0]:
                 policy()
